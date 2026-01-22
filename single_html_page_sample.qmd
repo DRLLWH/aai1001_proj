@@ -1,0 +1,524 @@
+---
+title: Week 02 Assessment -- `Quarto` Website
+subtitle: AAI1001 -- Data Engineering and Visualization<br>AY25/26 Tri 2 (Assisted by GenAI)<br>Assessment 1 (Individual 1, Open Book) 
+author:  
+  name: Guang Hua
+  affiliations: Singapore Institute of Technology
+date: 2026-01-15
+date-format: "dddd MMM DD, YYYY"
+
+format: 
+  html: 
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    html-table-processing: none
+---
+
+```{r}
+#| include: false
+
+library(gt)
+library(gtExtras)
+library(knitr)
+library(tidyverse)
+```
+
+# Lab Individual Assessment Rules (Open Book) {.unnumbered style="border: 1px solid; margin: 5px;"}
+
+Academic integrity is of utmost importance. Therefore, all solutions submitted must be the result of your individual effort during the allocated two-hour assessment period. To encourage academic integrity, you must follow these guidelines:
+
+1. Place your SIT student photo ID prominently on your desk for identification.
+
+2. Avoid noises that may distract other students. Ensure that your mobile phone and laptop are muted. Headsets and earphones are not permitted.
+
+3. The only electronic device allowed on your desk is a laptop. Keep all other devices away from your desk.
+
+4. You may access the Internet through the laptop, and the use of generative artificial intelligence (GenAI) is permitted as long as it does not involve real-time communication with any person.
+
+5. Printed materials are allowed on your desk.
+
+6. **Strictly avoid real-time communication with anyone other than the instructors.** Forbidden communication channels include, but are not limited to, email, messenger apps, and shared online accounts. Do not engage in discussions with other students, and refrain from viewing their monitors.
+
+7. **Exchanging files with anyone other than the instructors** (e.g., using `GitHub`, Dropbox, or `RStudio Server Pro`) is strictly forbidden, whether before, during, or after the assessment. This rule extends to shared code that could potentially be used by other students, including those in future iterations of this course.
+
+***Non-compliance with these rules will lead to appropriate disciplinary procedures.***
+
+
+
+# Introduction
+
+In Week 01's lecture and lab, we have learned the basics of `Quarto Markdown` and the creation of a single HTML page, the `revealjs` presentation slides, as well as a book that consolidates multiple HTML pages as chapters. In this lab session, you will be guided to create your personal website using `Quarto` and host it on `GitHub` Pages. @sec-build-personal-website guides you through the process of creating a `GitHub` repository for your website, building a `Quarto` website, and hosting the website on `GitHub` Pages. @sec-enrich-personal-website then guides you to configure, format, and enrich your website.
+
+## `GitHub` Pages
+
+In Week 01, we have covered the introduction of `Git` and `GitHub`, whereby you have been guided to create your `GitHub` account, activate your educational license and `GitHub` copilot, create a `GitHub` repository, and manage the repository in `RStudio`. In this lab session, we will introduce another useful `GitHub` feature called `GitHub` Pages.
+
+[GitHub Pages](https://pages.github.com/){target="_blank"} is a feature provided by `GitHub` that allows you to host a website directly from a repository on `GitHub`. It is a great way to share your profile and work with the world. `GitHub` Pages is a static site hosting service that takes `.html`, `.css`, or `JavaScript` files straight from a repository on `GitHub`, optionally runs the files through a build process, and publishes a website.
+
+## Your Website URL
+
+-   **Project Website**. The URL of your project website will be in the format of `https://<username>.github.io/<repository-name>`, where `<username>` is your `GitHub` username and `<repository-name>` is the name of the repository that contains your website files. For example, my `GitHub` username is `ghua-ac`, and if I want to create a project website that hosts the course material of AAI1001, then the URL will be `https://ghua-ac.github.io/aai1001`.
+
+-   **Personal Website**. If you create a personal website, the URL will best be in the format of `https://<username>.github.io`, where `<username>` is your `GitHub` username. For example, my personal website URL is <https://ghua-ac.github.io>{target="_blank"}. **Your task in Assessment 1 is to create your personal website and make it available online.**
+
+::: column-margin
+By convention, URLs are typically written in lowercase for readability. Technically, the part of the URL after the domain name `<username>.github.io/` can be case-sensitive depending on the web server. Most servers are configured to be case-insensitive, but it's best to avoid using uppercase letters just to be safe.
+:::
+
+# Building Your Personal Website with `Quarto` and `GitHub` Pages {#sec-build-personal-website}
+
+## Creating a `GitHub` Repository for Your Website {#sec-create-empty-repo}
+
+1.  Log in to `GitHub` using your account, and create a **new repository**.
+2.  On the **New Repository** page, fill in the information as shown in @fig-new-repo. Note that the **Repository name \*** must be in the format of `<username>.github.io`, and you can set the repository to be **private**, so the source code of your page can only be viewed by you.
+
+::: column-margin
+Note that the `GitHub` repository that hosts your personal website can be private, while the rendered website at `<username>.github.io` will still be public.
+:::
+
+![`GitHub` **Create a new repository** page.](imgs/lab_create_github_personal.png){#fig-new-repo .lightbox width="90%"}
+
+3.  Click the **Create repository** button to compete the process.
+4.  Customize the repository to make it ready to work with `Quarto` website (@fig-new-repo-setting). In your repository, click the upper right **Settings** tab, and in the left panel, click **Pages**. Under **Branch**, please make selection to make sure that the website is built from the `/docs` branch. This is very important to ensure that your `Quarto` website content interacts smoothly with `GitHub` Pages, as will be clearer later.
+
+![`GitHub` Pages build directory setting.](imgs/lab_github_page_setting.png){#fig-new-repo-setting .lightbox width="100%"}
+
+We are now ready to create a `Quarto` website and put the content into the created `GitHub` repository. Normally, we do not edit the repository content online on the `GitHub` website, but rather we clone the repository to our local machine, edit the content locally, and push the changes back to the repository. This is the workflow we will follow in the next section.
+
+## Creating an Empty `Quarto` Project by Cloning the `Git` Repository {#sec-create-quarto-web-clone-git}
+
+In `RStudio`, click **File**→**New Project**. In the pop-up **New Project Wizard**, select **Version Control**→**Git**. Then, in the **Clone Git Repository** window, enter the URL of the `GitHub` repository you have just created in @sec-create-empty-repo, which should be in the format of `https://github.com/<username>/<username>.github.io.git`. In the **Project directory name** field, make sure that the directory is named `<username>.github.io` (@fig-new-web-proj-setting). When all are set, click **Create Project**.
+
+![Put the correct `GitHub` repository URL and **Directory name**.](imgs/lab_import_git_repo_for_website.png){#fig-new-web-proj-setting .lightbox width="60%"}
+
+The created project will be opened in `RStudio` automatically. Since the `GitHub` repository you created in @sec-create-empty-repo is an empty project, the created `RStutio` project here is also an empty project, with only the `.Rproj` and `.gitignore` files shown in the **Files** tab.
+
+## Creating a Default `Quarto` Website Project {#sec-default-quarto-web}
+
+To leverage the the built-in template for creating a website, we now create a new `Quarto` website project without version control. All we want are the default files that come within the `Quarto` website template. Please do not tick **Create a git repository** in the window, as shown in @fig-new-temp-quarto-web-name, because this is a temporary project only whose documents are wanted.
+
+![Creating a temporary `Quarto` website without version control.](imgs/lab_new_quarto_temp_web_name.png){#fig-new-temp-quarto-web-name .lightbox width="60%"}
+
+The created project will be opened in `RStudio` automatically, as shown in @fig-new-temp-quarto-web-screenshot. The project contains the following files:
+
+-   `_quarto.yml`: The `YAML` configuration file for the `Quarto` website.
+-   `index.qmd`: The main page of the website.
+-   `about.qmd`: The about page of the website.
+-   `style.css`: The CSS file for styling the website.
+
+::: column-margin
+`YAML`, which stands for "YAML Ain't Markup Language", is a human-readable data serialization format. It is commonly used for configuration files and in applications where data is being stored or transmitted. `YAML` uses a text-based structure that includes lists, scalars, and associative arrays, making it intuitive and easy to understand. The format supports complex data structures yet maintains simplicity through the use of indentation to denote structure. This makes `YAML` particularly suitable for settings, model parameters, or specifying details in a clear and organized manner.
+:::
+
+Copy the four files in to the directory of your empty `Quarto` project created in @sec-create-quarto-web-clone-git. Afterward, you can delete the temporary project to clean up your space.
+
+![Creating a temporary `Quarto` website without version control.](imgs/lab_default_quarto_web_screenshot.png){#fig-new-temp-quarto-web-screenshot .lightbox width="100%"}
+
+## Publishing `Quarto` Website on `GitHub` Repository
+
+### Changing the Output Directory of `Quarto` Website to `docs`
+
+By now, the `Quarto` project you created in @sec-create-quarto-web-clone-git should contain the default `Quarto` website files. Open either `index.qmd` or `about.qmd` in `RStudio` and click the **Render** button, you will see the default website built in the `_site` folder in your project directory. Recall that on `GitHub` Pages, in @fig-new-repo-setting, we have set the build directory to `docs` (the better option among the two choices on `GitHub` Pages). Therefore, we need to change the `Quarto` website output directory from the default `_site` to `docs`, so that the website content can be correctly handled by `GitHub` Pages.
+
+To do so, open the `_quarto.yml` file in `RStudio`, you will see the first few lines of the file as follows:
+
+``` yml
+project:
+  type: website
+```
+
+which specify that this project is a website. Add `output-dir: docs` to the setting
+
+``` yml
+project:
+  type: website
+  output-dir: docs
+```
+::: column-margin
+Configuration in `YAML` format is indentation-sensitive. The number of spaces used for indentation is not fixed, but it must be consistent throughout the file. The most common indentation is two spaces, but four spaces or a tab are also used. You can set the number of tab spaces in **Tools**&rarr;**Global Options**&rarr;**Code**&rarr;**Editing**. The key-value pairs in `YAML` are separated by a colon, and the value can be a string, number, list, or another object.
+:::
+
+and pay attention to the indentation. Save the file, open either `index.qmd` or `about.qmd`, and click the **Render** button, you will see the website content built in the `docs` folder in your project directory. You can now remove the `_site` folder in your project directory.
+
+### Pushing the changes to the `GitHub` repository
+
+After the output directory of the `Quarto` website is changed to `docs` and rendering the website content in it, you can now push the changes to the `GitHub` repository created in @sec-create-empty-repo. In `RStudio`, click the **Git** tab in the upper right panel, and you will see the changes you made in the **Git** tab. Click the **Commit** button to commit the changes, and then click the **Push** button to push the changes to the `GitHub` repository. Alternatively, in the bottom left **Terminal** tab, you can use the following commands to commit and push the changes:
+
+``` bash
+git add .
+git commit -m "Initial commit"
+git push
+```
+
+After the changes are pushed to the `GitHub` repository, you can visit `github.com/<username>/<username>.github.io` to see that the files have been uploaded to the repository (similar to the screenshot you submitted during Week 01 lab). You can also visit the URL `<username>.github.io` to see that your personal website becomes available online, subject to some time delay used for building and deploying your website. 
+
+
+### Track the `GitHub` Pages Build Process
+
+After you push the new web content to `GitHub`, the website will be updated automatically, but usually there is a delay of one or two minutes whenever you push changes to the repository. To track the build process, you can go to the **Actions** tab in your repository, where you can see the build process of the website. See @fig-git-action for example. Please note that the action history will only be available if you at least successfully pushed your content (should be stored in `/docs` folder) and made `GitHub` Pages work once.
+
+![`GitHub` **Actions** page.](imgs/lab_git_action.jpg){#fig-git-action .lightbox width="99%"}
+
+# Enriching Your Personal Website {#sec-enrich-personal-website}
+
+Now, you have successfully created the framework leveraging `Quarto` and `GitHub` Pages to manage your personal website. You can enrich your website by adding more content, styling the website, and configuring the website to meet your needs.
+
+::: column-margin
+For more information about `Quarto` website, please visit [here](https://quarto.org/docs/websites/){target="_blank"}.
+:::
+
+## Configuring and Styling Your Website
+
+### The `YAML` Header `_quarto.yml`
+
+The `_quarto.yml` file is the configuration file for the `Quarto` website. Your website begins with the following default settings:
+
+``` yml
+project:
+  type: website
+  output-dir: docs
+  
+website:
+  title: "temp_website"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+```
+
+-   `project`: The project settings, including the project type and the output directory.
+-   `website`: The website settings, including the website title and the navigation bar.
+-   `format`: The format settings, including the HTML theme, the CSS file, and the table of content (toc).
+
+You can add more customizable settings under the three sections in `_quarto.yml` to configure your website. For example, you can add a favicon to your website and a logo to the navigation bar by adding the following in the `website` section:
+
+``` yaml
+website:
+  title: "temp_website"
+  favicon: favicon.png
+  navbar:
+    logo: logo.png
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+```
+
+where `favicon.png` and `logo.png` are two images in your project directory. Under the `format` of `html` section, you can apply HTML options, e.g., setting the `toc` depth and location by using `toc-depth` and `toc-location` options:
+
+``` yaml
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    toc-location: left
+```
+
+**Themes**. `Quarto` has incorporated 25 [Bootswatch](https://bootswatch.com/) themes that can be used in the `html` format (see <https://quarto.org/docs/output-formats/html-themes.html>{target="_blank"}). The default website theme is [`cosmo`](https://bootswatch.com/cosmo/){target="_blank"}. You can change the theme simply by replacing `cosmos` by, say, `darkly`, and then re-render the website.
+
+-   For more about `YAML` options, visit <https://quarto.org/docs/reference/projects/websites.html>{target="_blank"}.
+-   For more about navigation bar, visit <https://quarto.org/docs/websites/website-navigation.html>{target="_blank"}.
+-   For more about HTML options, visit <https://quarto.org/docs/reference/formats/html.html>{target="_blank"}.
+-   For more about website tools, visit <https://quarto.org/docs/websites/website-tools.html>{target="_blank"}.
+
+### The CSS Style File `style.css`
+
+In the `_quarto.yml` file, the `css: styles.css` option specifies that the `styles.css` file is used to style the website. You can add CSS rules in the `styles.css` file to style the website.
+
+::: column-margin
+Cascading style sheets (CSS) is a style sheet language used for describing the presentation of documents written in HTML. It enables web developers to control the layout, colors, fonts, and overall visual appearance of their web pages. By separating content from design, CSS simplifies site maintenance and ensures consistent styling across multiple pages.
+:::
+
+For example, you can change the font family and font size by adding the following rules in the file:
+
+``` css
+body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+}
+```
+
+You can set paragraph style as follows:
+
+``` css
+p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+```
+
+which sets the margin and padding of the paragraph to `0`, and the line height to `1.2`. You can also change the font size of the headings:
+
+``` css
+h1,h2 {
+  font-size: 16pt;
+}
+h3,h4 {
+  font-size: 14pt;
+}
+```
+
+which sets the font size of `h1` (#) and `h2` (##) to `16pt`, `h3` (###) and `h4` (####) to `14pt`. You can find more information about CSS styling at <https://www.w3schools.com/css/>. You can leave the styling for the moment and work on adding content to your website first.
+
+## Adding Content to Your Website
+
+### Your Tasks of Adding Content
+Your main task here is to enrich your website by adding content, in terms of web pages, related to yourself. These include:
+
+1.  Enrich your homepage, which is `index.qmd` file, with either your short self-introduction, a photo, video, their combination, or something that best represents you.
+2.  Rename the `about` page to other names, e.g., `FYP Project` or other project, and add content related to your final year project (or other project) prior to entering SIT.
+3.  Add one page named `Data Visualization`, in which share one visualization work that you have created in any period of your student life. The example must visualize quantitative data (numerical values) using a graph. Purely artistic drawings or illustrations that do not encode numeric values are not acceptable. Explain the content in the visualization (what were visualized) and share the story behind this task, including the rationale of your way of visualization.
+4.  **(Optional)** Add one or more pages with your preferred title and related content which could be anything you would like to share. Here are a few examples that may inspire you:
+    -  `Curriculum` that you have taken is worth of sharing in your opinion.
+    -  `Learning Notes` you have taken in the past and how they helped you.
+    -  `Hobbies` you would like to share and how they are carried out.
+    -  `Travel Experience` you have had and how they influenced you.
+    -  `Recipe of XXX`: about your favorite dish and the cooking steps.
+    -  `Movie XXX`: sharing of your favorite movie information and your feedback.
+    -  You can choose from countless subjects that you have experienced for sharing.
+5. Add a `Reflection` page with the title "Reflection on the use of GenAI". In this page, share your experience of using GenAI to help you accomplish the assessment. A few optional aspects for you to consider if you have no idea what to write:
+    -  What is the GenAI tool you have used? Why did you choose it?
+    -  How did the GenAI tool help you in completing the assessment (with examples)?
+    -  What do you think are beneficial about the tool? 
+    -  What do you think are challenging about the tool?
+    -  How do you think will GenAI tools assist you for your future study or work?
+    -  Any other thoughts you would like to share.
+  
+In the above web pages that you create, try to apply `markdown` syntax (e.g., list, hyperlink, screenshot, code chunk, quote, etc.) to improve the formatting. Please be honest and specific in your writing and share your genuine experience and thoughts.
+
+:::{style="border: 1px solid; margin: 5px;"}
+**⚠️ IMPORTANT PHILOSOPHY FOR THIS TASK**
+
+**Do not write everything from scratch.** Most of the content required above should **already exist** in your archives (past assignments, old reports, existing notes). Your effort should focus on **integrating** these materials into the website rather than creating new content.
+
+Furthermore, you are highly encouraged to **use GenAI wisely** to help polish, format, and enrich your existing content. Work smart!
+:::
+
+
+### Tips for Writing Content
+
+Here are a few tips that you may use to add rich content to your website.
+
+#### Adding Images
+
+You can add both local and online images by using the following syntax:
+
+``` md
+![Image description](path/to/image.png){width=80%}  # Image with caption
+![](imgs/lab_sit_logo.png){width=80%}  # Image without caption
+```
+
+The above code for SIT logo image without caption will be rendered as follows:
+
+![](imgs/lab_sit_logo.png){width="80%"}
+
+<hr>
+
+#### Adding Videos
+
+You can add both local and online videos by using the following syntax:
+
+``` md
+{{{< video path/to/video.mp4 width="600" height="400" >}}}
+{{{< video https://www.youtube.com/watch?v=rphrFDf00mk width="600" height="400" >}}}
+```
+
+The online video will be rendered as follows:
+
+{{< video https://www.youtube.com/watch?v=rphrFDf00mk width="600" height="400" >}}
+
+<hr>
+
+#### Media with Text
+
+Your can arrange media and text horizontally by using the following commands:
+
+``` md
+::: {style="float:left; position: relative; top: 0px"}
+![](imgs/lab_sit_logo.png){height="100px" style="margin-right: 10px; align: left"}
+:::
+
+The Singapore Institute of Technology (SIT) is Singapore’s first University of Applied Learning and the third largest university by intake in Singapore. SIT’s mission is to maximise the potential of our learners and to innovate with industry, through an integrated applied learning and research approach, so as to contribute to the economy and society.
+```
+
+which will be rendered as follows:
+
+::: {style="float:left; position: relative; top: 0px"}
+![](imgs/lab_sit_logo.png){height="120px" style="margin-right: 20px; align: left"}
+:::
+
+The Singapore Institute of Technology (SIT) is Singapore’s first University of Applied Learning and the third largest university by intake in Singapore. SIT’s mission is to maximise the potential of our learners and to innovate with industry, through an integrated applied learning and research approach, so as to contribute to the economy and society.
+
+<hr>
+
+# End-of-Lab Checklist
+
+This assessment session has guided you to create your personal website using `Quarto` and host it on `GitHub` Pages. You have learned how to create a `GitHub` repository for your website, build a `Quarto` website, and host the website on `GitHub` Pages. You have also learned how to configure, format, and enrich your website. By the end of this session, you should have completed the following tasks:
+
+1.  Created the `Quarto` website project which renders the website without errors.
+2.  Synchronized your `Quarto` website with the `GitHub` repository.
+3.  Created at least 4 pages including the homepage, FYP project, data visualization, and the reflection page.
+4.  Applied some formatting and styling in `_quarto.yml`, `style.css`, and page content.
+5.  Verified that your personal website is available online at `https://<username>.github.io`.
+
+
+# Submission
+
+1. **Put the URL of your personal website `https://<username>.github.io` in LMS comment section when you make submission.**
+2. **Upload your zipped `Quarto` website project files to xSITe.**
+    -   The acceptable file format is `.zip` only.
+    -   You can name the `.zip` file using the URL, e.g., `ghua-ac.github.io.zip`. 
+    -   **DO NOT** submit hidden files such as `.Rproj.user`, `.git`, `.gitignore`, etc.
+    -   Submit minimal files, i.e., only necessary files to generate the website.
+    -   To avoid submitting big files, use video URLs instead of linking them locally.
+
+
+
+# Rubrics
+
+<!-- ```{r} -->
+<!-- #| label: rubrics -->
+<!-- #| echo: false -->
+<!-- #| eval: true -->
+
+<!-- tribble( -->
+<!--   ~Criteria,                                            ~`Points (%)`, -->
+<!--   "Creation of GitHub Repository",                        "10", -->
+<!--   "- Proper naming and privacy settings",                 "", -->
+<!--   "- Correct branch selection for GitHub Pages",          "", -->
+<!--   "Cloning GitHub Repository and Quarto Setup",           "10", -->
+<!--   "- Successfully cloned repository in RStudio",          "", -->
+<!--   "- Created Quarto project without version control",     "", -->
+<!--   "Building and Publishing Quarto Website",               "20", -->
+<!--   "- Configured Quarto website output directory",         "", -->
+<!--   "- Pushed changes to GitHub repository",                "", -->
+<!--   "Enrichment of Personal Website",                       "50", -->
+<!--   "- Added content to homepage and at least two additional pages",   "", -->
+<!--   "- Applied formatting and styling to `YAML` and CSS",     "", -->
+<!--   "- Included images, videos, and media with text",       "", -->
+<!--   "Maintaining a Clean and Tidy Project",                 "10", -->
+<!--   "- Deleted the temparary GitHub repository",            "", -->
+<!--   "- Not Creating Additional Wasted Files",               "", -->
+<!--   "Total",                                                "100" -->
+<!-- ) |> -->
+<!--   gt() |> -->
+<!--   tab_options( -->
+<!--     table.font.size = 16, -->
+<!--     column_labels.background.color = "lightblue", -->
+<!--     column_labels.font.weight = "bold", -->
+<!--     table.align = "left", -->
+<!--     table.width = pct(100), -->
+<!--     data_row.padding = px(2) -->
+<!--   ) -->
+<!-- ``` -->
+
+
+
+<!-- ```{r} -->
+<!-- #| label: rubrics -->
+<!-- #| echo: false -->
+<!-- #| eval: true -->
+
+<!-- tribble( -->
+<!--   ~Criteria,                                                        ~"Points (%)", -->
+<!--   "Proper naming and privacy settings",                             "5", -->
+<!--   "Correct branch selection for GitHub Pages",                      "5", -->
+<!--   "Successfully cloned repository in RStudio",                      "5", -->
+<!--   "Created Quarto project without version control",                 "5", -->
+<!--   "Configured Quarto website output directory",                     "10", -->
+<!--   "Pushed changes to GitHub repository",                            "10", -->
+<!--   "Added sufficient content to homepage, project page, and at least one more pages",    "30", -->
+<!--   "Applied formatting and styling to `YAML` and CSS",                 "10", -->
+<!--   "Included images, videos, and media with text",                   "10", -->
+<!--   "Deleted the temparary GitHub repository",                        "5", -->
+<!--   "Not creating additional wasted files",                           "5", -->
+<!--   "Total",                                                          "100" -->
+<!-- ) |> -->
+<!--   gt(rowname_col="Criteria")|> -->
+<!--   tab_row_group( -->
+<!--     label = "Maintaining a Clean and Tidy Project (10%)", -->
+<!--     rows = c("Deleted the temparary GitHub repository", "Not creating additional wasted files") -->
+<!--   ) |> -->
+<!--   tab_row_group( -->
+<!--     label = "Enrichment of Personal Website (50%)", -->
+<!--     rows = c("Added sufficient content to homepage, project page, and at least one more pages", "Applied formatting and styling to `YAML` and CSS", "Included images, videos, and media with text") -->
+<!--   ) |> -->
+<!--   tab_row_group( -->
+<!--     label = "Building and Publishing Quarto Website (20%)", -->
+<!--     rows = c("Configured Quarto website output directory", "Pushed changes to GitHub repository") -->
+<!--   ) |> -->
+<!--   tab_row_group( -->
+<!--     label = "Cloning GitHub Repository and Quarto Setup (10%)", -->
+<!--     rows = c("Successfully cloned repository in RStudio", "Created Quarto project without version control") -->
+<!--   ) |> -->
+<!--   tab_row_group( -->
+<!--     label = "Creation of GitHub Repository (10%)", -->
+<!--     rows = c("Proper naming and privacy settings", "Correct branch selection for GitHub Pages") -->
+<!--   ) |> -->
+<!--   tab_style( -->
+<!--     style = cell_fill(color = "lightyellow"), -->
+<!--     locations = cells_row_groups(groups = c("Creation of GitHub Repository (10%)", "Enrichment of Personal Website (50%)", "Building and Publishing Quarto Website (20%)", "Cloning GitHub Repository and Quarto Setup (10%)", "Maintaining a Clean and Tidy Project (10%)")) -->
+<!--   ) |> -->
+<!--   tab_options( -->
+<!--     table.font.size = 16, -->
+<!--     column_labels.background.color = "lightblue", -->
+<!--     column_labels.font.weight = "bold", -->
+<!--     table.align = "left", -->
+<!--     table.width = pct(100), -->
+<!--     data_row.padding = px(2) -->
+<!--   ) |> -->
+<!--   tab_header( -->
+<!--     title = "Rubrics for Week 02 Lab" -->
+<!--   ) -->
+<!-- ``` -->
+
+```{r}
+#| label: rubrics
+#| echo: false
+#| eval: true
+
+tribble(
+  ~Aspect,  ~Criteria, ~Points,
+  "`Quarto` and `GitHub` Configuration", "Proper naming and privacy settings of `GitHub` repository<br>Successful publishing of the `Quarto` website (URL accessible)<br>Pushed changes to `GitHub` (submission-remote consistency)", "30",
+  "Content Richness and Quality", "Added rich content to at least 4 pages<br>Applied rich external styling in `YAML` and `CSS`<br> Applied rich inline `markdown` formatting in pages<br> Included images, videos, and media with text<br> Reflection on the use of GenAI genuine and thoughtful", "60",
+  "Formatting and Submission", "`.zip` file properly named and URL properly provided<br>Deleted the temporary `GitHub` repository<br>Not submitting hidden files<br>Not submitting bulky media files (use link instead)",  "10",
+  "Total", " ", "100"
+) |>
+  gt(rowname_col="Aspect") |>
+  tab_options(
+    table.font.size = 16,
+    column_labels.background.color = "lightblue",
+    column_labels.font.weight = "bold",
+    table.align = "left",
+    table.width = pct(100),
+    data_row.padding = px(3)
+  ) |>
+  tab_header(
+    title = "Rubrics for Assessment 1 (Individual 1)"
+  ) |>
+  fmt_markdown() |>
+  cols_width(
+    Aspect ~ pct(25),
+    Criteria ~ pct(65),
+    Points ~ pct(10)
+    )
+```
+
+
+
+
+
