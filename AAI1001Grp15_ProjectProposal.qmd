@@ -1,0 +1,142 @@
+---
+title: "Data Engineering and Visualisation – Team Project Proposal"
+subtitle: "Group 15: HDB Resale Prices (2017–2024) – Estate Maturity Effects on Price Distributions"
+author: "Group 15"
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
+params:
+  resale_csv: "sg-resale-flat-prices-2017-onwards.csv"
+  maturity_xlsx: "flat_muturity_status.xlsx"
+---
+
+## Visualisation Chosen
+
+**Original visualisation (Tableau Public):**  
+Singapore HDB Resale – Heatmap/Density view of resale price distribution by flat type  
+<https://public.tableau.com/app/profile/fshih/viz/SingaporeHDBResale/HDBresale>
+
+::: {#fig-original-viz}
+![](images/visualisation.jpg){fig-alt="Original Tableau heatmap of HDB resale price distribution" width=850}
+:::
+
+### What the original chart shows (4D)
+
+The chosen visualisation is a **density heatmap** overlaid on **categorical columns**:
+
+- **x-axis:** flat type (1-Room to Multi-Generation)
+- **y-axis:** resale price
+- **colour intensity:** transaction density  
+  - *hotspots* = most common price points  
+  - *faint areas* = outliers
+- **4th dimension:** mature vs non-mature estates (an important hidden variable the chart can obscure)
+
+This matches the framing in our proposal: **room type, price, floor area, mature vs non-mature**.
+
+### Story / Narrative
+
+> **“The Price of Space in Singapore.”**
+
+The chart illustrates a clear, **non-linear relationship**: as flat size increases (3-Room → 5-Room), both the **price floor** and **price ceiling** rise. Dense hotspots reveal the “true market range,” while a faint “million-dollar tail” shows rare high-end transactions that do not represent the typical market. This preserves outliers without letting them dominate the general trend.
+
+---
+
+## Strengths and Weaknesses of Chosen Visualization
+
+### Strengths
+
+1. **Handles high-volume data without overplotting**  
+   Using density (colour intensity) prevents scatterplot “ink blobs” from thousands of overlapping points.
+
+2. **Immediate trend recognition**  
+   Viewers can quickly see the upward “clouds” and overall correlation between room count and price.
+
+3. **Outlier visibility without distortion**  
+   Shows full min–max range while keeping focus on the central market band (typical transactions).
+
+### Weaknesses
+
+1. **Lack of statistical precision**  
+   Colours are subjective and do not reveal exact median / IQR values clearly.
+
+2. **Unclear colour scale**  
+   Without a clear legend, the transaction count defining a “hotspot” is ambiguous.
+
+3. **Hidden variables are obscured**  
+   Mature and non-mature estates get mixed, potentially misleading viewers about the true source of variance (e.g., geography/location effects).
+
+---
+
+## Proposed Improvements (with detailed justification)
+
+We will restructure the design into a **split violin plot with boxplot overlay**, providing both distribution shape and statistical precision.
+
+### Structural and dimensional improvements
+
+- Transition from an unstructured continuous scatter to a **categorical x-axis** defined by housing tiers (3-Room, 4-Room, 5-Room, Executive).
+- Maintain a clear **y-axis** for market valuation to identify **minimum entry cost** and **maximum valuation** per category.
+
+### Density and comparative analysis improvements
+
+- Use **violin width** to represent transaction probability density, resolving overplotting while exposing **unimodal vs multi-modal** pricing structure.
+- Apply **split hue strategy**:
+  - **left half = mature**
+  - **right half = non-mature**  
+  This directly tests whether mature estates have higher medians and/or wider variance, without needing separate charts.
+
+### Statistical validation improvements
+
+Overlay a **boxplot inside each violin** to show:
+- median
+- interquartile range (IQR)
+- outliers
+
+This bridges visual intuition and analytical rigor.
+
+---
+
+## Data Sources (2 Datasets)
+
+We use two complementary sources:
+
+1. **HDB Resale Flat Prices (2017–2024) – transactional backbone**  
+   Provides core quantitative variables (e.g., `resale_price`, `flat_type`, `town`, `month`).
+
+2. **Estate maturity classification lookup – town → mature/non-mature**  
+   Serves as a lookup table introducing the maturity dimension for comparative analysis (price premiums between established vs developing estates).
+
+---
+
+## Data Engineering Workflow (Raw → Visualization-ready)
+
+We will document all steps to ensure reproducibility, as required for the proposal submission.
+
+::: {#fig-workflow}
+![](images/workflowdataengineering.jpg){fig-alt="Data engineering workflow from raw ingestion to visualization-ready dataset" width=850}
+:::
+
+---
+
+## Proposed Work Distribution
+
+| Name      | Distributed Work                                    |
+|-----------|-----------------------------------------------------|
+| Ming Yang | Data ingestion & data dictionary                    |
+| Zi Xin    | Data cleaning (resale transactions)                 |
+| Desmond   | Data cleaning (maturity lookup) & join              |
+| Daryl     | Validation & metrics generation (e.g., median, IQR) |
+| Zulhilmi  | Data visualisation & storytelling                   |
+
+---
+
+## Conclusion
+
+This proposal outlines a complete plan to critique an existing high-volume heatmap visualisation and improve it using a **split comparative violin plot** with **boxplot overlays** to add statistical clarity. We will enrich raw resale transactions with **estate maturity status**, validate the join and data quality, and produce a professional final visual that directly tests whether mature estates exhibit a consistent price premium across flat types.
