@@ -1,0 +1,272 @@
+---
+jupyter:
+  kernelspec:
+    display_name: R
+    name: ir
+    language: R
+---
+
+```{r}
+#| vscode: {languageId: r}
+library(tidyverse)
+library(lubridate)
+library(forecast)
+library(readxl)
+library(scales)
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/}
+#| vscode: {languageId: r}
+resale_data <- read_csv("sg-resale-flat-prices-2017-onwards.csv")
+maturity_data <- read_excel("flat_muturity_status.xlsx")
+
+glimpse(resale_data)
+glimpse(maturity_data)
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/}
+#| vscode: {languageId: r}
+df_step1 <- resale_data %>%
+  mutate(
+    transaction_date = ym(month),
+    transaction_year = year(transaction_date),
+    transaction_month = month(transaction_date)
+  ) %>%
+  separate(storey_range, into = c("storey_lower", "storey_upper"),
+           sep = " TO ", convert = TRUE, remove = FALSE) %>%
+  mutate(storey_avg = (storey_lower + storey_upper) / 2)
+
+glimpse(df_step1)
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 286}
+#| vscode: {languageId: r}
+df_step2 <- df_step1 %>%
+  mutate(
+    lease_years = as.numeric(str_extract(remaining_lease, "^\\d+")),
+    lease_months_str = str_extract(remaining_lease, "\\d+(?=\\s*month)"),
+    lease_months = coalesce(as.numeric(lease_months_str), 0),
+    remaining_lease_years = lease_years + (lease_months / 12)
+  )
+
+head(df_step2 %>% select(remaining_lease, remaining_lease_years))
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 611}
+#| vscode: {languageId: r}
+flat_type_counts <- df_step2 %>%
+  count(flat_type) %>%
+  mutate(percentage = (n / sum(n)) * 100)
+
+print(flat_type_counts)
+
+ggplot(df_step2, aes(x = fct_infreq(flat_type), fill = flat_type)) +
+  geom_bar() +
+  geom_text(stat='count', aes(label=..count..), vjust=-0.5, size=3) +
+  labs(
+    title = "Transaction Volume by Flat Type (Pre-Filtering)",
+    subtitle = "Justification for excluding 1-ROOM and 2-ROOM units due to low sample size",
+    x = "Flat Type",
+    y = "Number of Transactions"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 69}
+#| vscode: {languageId: r}
+cleaned_resale_data <- df_step2 %>%
+  mutate(
+    price_per_sqm = resale_price / floor_area_sqm
+  ) %>%
+  filter(!flat_type %in% c("1 ROOM", "2 ROOM", "MULTI-GENERATION"))
+
+table(cleaned_resale_data$flat_type)
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 286}
+#| vscode: {languageId: r}
+maturity_data_clean <- maturity_data %>%
+  mutate(town = toupper(`Estate Name`)) %>%
+  select(town, maturity_status = Classification)
+
+joined_dataset <- cleaned_resale_data %>%
+  left_join(maturity_data_clean, by = "town")
+
+head(joined_dataset %>% select(town, maturity_status))
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/}
+#| vscode: {languageId: r}
+final_dataset <- joined_dataset %>%
+  mutate(
+    region = case_when(
+      town %in% c("WOODLANDS", "SEMBAWANG", "YISHUN") ~ "North",
+      town %in% c("TAMPINES", "PASIR RIS", "BEDOK", "CHANGI VILLAGE") ~ "East",
+      town %in% c("JURONG WEST", "JURONG EAST", "BUKIT BATOK", "CLEMENTI",
+                  "CHOA CHU KANG", "BUKIT PANJANG", "TENGAH") ~ "West",
+      town %in% c("HOUGANG", "PUNGGOL", "SENGKANG", "SERANGOON") ~ "North-East",
+      TRUE ~ "Central"
+    ),
+    flat_type = as.factor(flat_type),
+    region = as.factor(region),
+    maturity_status = as.factor(maturity_status)
+  )
+
+missing_values_check <- final_dataset %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+print(missing_values_check)
+glimpse(final_dataset)
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 437}
+#| vscode: {languageId: r}
+df_plot <- joined_dataset %>%
+  filter(flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM", "EXECUTIVE")) %>%
+  mutate(flat_type = factor(flat_type, levels = c("3 ROOM", "4 ROOM", "5 ROOM", "EXECUTIVE")))
+
+ggplot(df_plot, aes(x = flat_type, y = resale_price, fill = maturity_status)) +
+  geom_violin(position = position_dodge(width = 0.8), alpha = 0.5, trim = FALSE) +
+  geom_boxplot(position = position_dodge(width = 0.8), width = 0.2, color = "black", alpha = 0.7, outlier.size = 0.5) +
+  scale_y_continuous(breaks = seq(0, 2000000, by = 250000), labels = label_dollar(scale = 1/1000, suffix = "k")) +
+  labs(
+    title = "Market Valuation Distribution: Mature vs Non-Mature Estates",
+    x = "Housing Tiers (Flat Type)",
+    y = "Resale Price (SGD)",
+    fill = "Estate Maturity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 437}
+#| vscode: {languageId: r}
+monthly_trend <- df_plot %>%
+  group_by(transaction_date, maturity_status) %>%
+  summarise(median_price = median(resale_price), .groups = "drop")
+
+generate_forecast <- function(status_name, data) {
+  status_data <- data %>% filter(maturity_status == status_name) %>% arrange(transaction_date)
+
+  ts_obj <- ts(status_data$median_price,
+               frequency = 12,
+               start = c(year(min(status_data$transaction_date)), month(min(status_data$transaction_date))))
+
+  fit <- auto.arima(ts_obj)
+  fc <- forecast(fit, h = 12)
+
+  last_date <- max(status_data$transaction_date)
+  future_dates <- seq(last_date %m+% months(1), by = "month", length.out = 12)
+
+  tibble(
+    transaction_date = future_dates,
+    median_price = as.numeric(fc$mean),
+    lower_95 = as.numeric(fc$lower[, 2]),
+    upper_95 = as.numeric(fc$upper[, 2]),
+    maturity_status = status_name,
+    data_type = "Forecast"
+  )
+}
+
+forecast_mature <- generate_forecast("Mature", monthly_trend)
+forecast_non_mature <- generate_forecast("Non-Mature", monthly_trend)
+
+historical_data <- monthly_trend %>% mutate(lower_95 = NA, upper_95 = NA, data_type = "Historical")
+
+combined_data <- bind_rows(historical_data, forecast_mature, forecast_non_mature) %>%
+  mutate(maturity_status = factor(maturity_status, levels = c("Mature", "Non-Mature")))
+
+ggplot(combined_data, aes(x = transaction_date, color = maturity_status, fill = maturity_status)) +
+  geom_ribbon(data = filter(combined_data, data_type == "Forecast"),
+              aes(ymin = lower_95, ymax = upper_95),
+              alpha = 0.3, color = NA) +
+  geom_line(aes(y = median_price, linetype = data_type), size = 1) +
+  scale_linetype_manual(values = c("Historical" = "solid", "Forecast" = "dashed")) +
+  scale_y_continuous(labels = label_dollar(scale = 1/1000, suffix = "k")) +
+  labs(
+    title = "Historical Median Resale Price and 12-Month ARIMA Forecast",
+    subtitle = "Comparing Mature vs Non-Mature Estates with 95% Prediction Intervals",
+    x = "Transaction Year",
+    y = "Median Resale Price (SGD)",
+    color = "Estate Maturity",
+    fill = "Estate Maturity",
+    linetype = "Data Type"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 454}
+#| vscode: {languageId: r}
+ggplot(df_plot, aes(x = remaining_lease_years, y = price_per_sqm, color = maturity_status)) +
+  geom_point(alpha = 0.1, size = 0.5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  facet_wrap(~ flat_type) +
+  scale_y_continuous(labels = label_dollar()) +
+  labs(
+    title = "Price per Sqm vs. Remaining Lease by Flat Type",
+    x = "Remaining Lease (Years)",
+    y = "Price per Sqm (SGD)",
+    color = "Estate Maturity"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+#| colab: {base_uri: https://localhost:8080/, height: 437}
+#| vscode: {languageId: r}
+GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin,
+  draw_group = function(self, data, ..., draw_quantiles = NULL) {
+    data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+    grp <- data[1, "group"]
+    newdata <- transform(data, x = if (grp %% 2 == 1) xminv else xmaxv)
+    newdata <- newdata[order(if (grp %% 2 == 1) newdata$y else -newdata$y), ]
+    newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+    newdata[c(1, nrow(newdata) - 1, nrow(newdata)), "x"] <- round(newdata[1, "x"])
+    if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+      stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 1))
+      quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+      aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+      aesthetics$alpha <- rep(1, nrow(quantiles))
+      both <- cbind(quantiles, aesthetics)
+      quantile_grob <- GeomPath$draw_panel(both, ...)
+      ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+    } else {
+      ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
+    }
+  }
+)
+
+geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
+  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
+}
+
+df_plot <- joined_dataset %>%
+  filter(flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM", "EXECUTIVE")) %>%
+  mutate(flat_type = factor(flat_type, levels = c("3 ROOM", "4 ROOM", "5 ROOM", "EXECUTIVE")))
+
+ggplot(df_plot, aes(x = flat_type, y = resale_price, fill = maturity_status)) +
+  geom_split_violin(alpha = 0.5, trim = FALSE) +
+  geom_boxplot(position = position_dodge(width = 0.25), width = 0.15, color = "black", alpha = 0.7, outlier.size = 0.5) +
+  scale_y_continuous(labels = label_dollar(scale = 1/1000, suffix = "k")) +
+  labs(
+    title = "Market Valuation Distribution: Mature vs Non-Mature Estates",
+    x = "Housing Tiers (Flat Type)",
+    y = "Resale Price (SGD)",
+    fill = "Estate Maturity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top")
+```
+
