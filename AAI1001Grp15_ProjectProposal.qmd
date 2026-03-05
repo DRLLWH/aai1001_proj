@@ -261,3 +261,10 @@ The maturity premium is computed as the difference in median prices between matu
 ## Conclusion
 
 This proposal outlines a complete plan to critique an existing high-volume heatmap visualisation and improve it using a **split comparative violin plot** with **boxplot overlays** to add statistical clarity. We will enrich raw resale transactions with **estate maturity status**, validate the join and data quality, and produce a professional final visual that directly tests whether mature estates exhibit a consistent price premium across flat types.
+
+## Reflection on the Use of AI Tools
+AI tools were used in this project primarily as a support mechanism to enhance productivity and clarity. AI assisted in refining written explanations, improving the structure of the proposal, and suggesting clearer phrasing for technical descriptions.
+
+During the data engineering stage, AI tools were also used to clarify R syntax, troubleshoot minor coding issues, and suggest alternative visualization techniques such as violin plots and boxplot overlays. These suggestions were critically evaluated and adapted by the team to ensure that the final design aligned with the project objectives and dataset characteristics.
+
+Through this process, the team learned that while AI can accelerate ideation and problem-solving, human judgement remains essential in validating outputs, interpreting data meaningfully, and ensuring analytical rigor.

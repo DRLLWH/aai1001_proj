@@ -18,8 +18,8 @@ library(scales)
 ```{r}
 #| colab: {base_uri: https://localhost:8080/}
 #| vscode: {languageId: r}
-resale_data <- read_csv("sg-resale-flat-prices-2017-onwards.csv")
-maturity_data <- read_excel("flat_muturity_status.xlsx")
+resale_data <- read_csv("data/sg-resale-flat-prices-2017-onwards.csv")
+maturity_data <- read_excel("data/flat_muturity_status.xlsx")
 
 glimpse(resale_data)
 glimpse(maturity_data)
