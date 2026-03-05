@@ -260,9 +260,18 @@ The maturity premium is computed as the difference in median prices between matu
 
 ## Conclusion
 
-This proposal outlines a complete plan to critique an existing high-volume heatmap visualisation and improve it using a **split comparative violin plot** with **boxplot overlays** to add statistical clarity. We will enrich raw resale transactions with **estate maturity status**, validate the join and data quality, and produce a professional final visual that directly tests whether mature estates exhibit a consistent price premium across flat types.
+This proposal outlines a structured approach to analysing HDB resale price distributions beyond commonly reported headline figures. By combining transaction-level resale data with a town-level estate maturity classification, the project constructs an enriched dataset that enables deeper examination of how resale prices vary across housing segments.
+
+The proposed data engineering workflow ensures that the raw datasets are cleaned, integrated, and transformed into a visualisation-ready format. Through feature aggregation and validation steps, the pipeline prepares the data for meaningful comparative analysis while maintaining the integrity of the original transaction records.
+
+To address the limitations of the original density heatmap, the project proposes a redesigned visualisation using **split violin plots with boxplot overlays**. This approach preserves distributional detail while introducing statistical clarity, allowing viewers to observe median prices, dispersion patterns, and potential outliers within each flat category. By explicitly separating mature and non-mature estates within each distribution, the improved visualisation makes structural differences in the housing market more transparent.
+
+Ultimately, this project aims to demonstrate how thoughtful data engineering and improved visual design can transform raw housing transaction data into insights that are both analytically rigorous and accessible to a broader audience. Through this approach, the analysis moves beyond simple price summaries to reveal the underlying distributional patterns that shape Singapore’s HDB resale market.
+
+---
 
 ## Reflection on the Use of AI Tools
+
 AI tools were used in this project primarily as a support mechanism to enhance productivity and clarity. AI assisted in refining written explanations, improving the structure of the proposal, and suggesting clearer phrasing for technical descriptions.
 
 During the data engineering stage, AI tools were also used to clarify R syntax, troubleshoot minor coding issues, and suggest alternative visualization techniques such as violin plots and boxplot overlays. These suggestions were critically evaluated and adapted by the team to ensure that the final design aligned with the project objectives and dataset characteristics.
