@@ -77,7 +77,7 @@ The chart effectively highlights where transaction “hotspots” occur and prov
 
 ## Proposed Improvements to Current Visualisation
 
-While the original heatmap effectively visualises transaction density, it prioritises visual intuition over statistical clarity. Our proposed redesign aims to retain distributional richness while introducing stronger aprecision and clearer comparative structure.
+While the original heatmap effectively visualises transaction density, it prioritises visual intuition over statistical clarity. Our proposed redesign aims to retain distributional richness while introducing stronger precision and clearer comparative structure.
 
 We will restructure the design into a **split violin plot with boxplot overlay**, providing both distribution shape and statistical precision.
 
@@ -144,7 +144,7 @@ This hybrid design bridges visual intuition and quantitative rigor. Viewers no l
 
 This enhancement is particularly important for policy interpretation and financial decision-making contexts, where explicit numerical indicators are required.
 
-### Improved Interprebility of the Visualisation
+### Improved Interpretability of the Visualisation
 
 Collectively, these improvements shift the visualisation from a density-based overview to a distribution-based analytical instrument.
 
@@ -219,9 +219,11 @@ By joining this lookup table to the resale transactions, we introduce a new expl
 :::
 
 ### Data Cleaning 
-Prior to analysis, the raw resale transaction records underwent specific transformation procedures to ensure data data integrity. The temporal dimension which was originally recorded as a character string was parsed and converted into a precise Date object to facilitate time-series indexing. Additionally, to enable accurate record linkage with the "Town-Level Geospatial Reference" dataset, the geospatial identifier ('town') was normalized to uppercase, ensuring a consistent primary key for the subsequent relational join operations.
+
+Prior to analysis, the raw resale transaction records underwent specific transformation procedures to ensure data integrity. The temporal dimension which was originally recorded as a character string was parsed and converted into a precise Date object to facilitate time-series indexing. Additionally, to enable accurate record linkage with the "Town-Level Geospatial Reference" dataset, the geospatial identifier ('town') was normalized to uppercase, ensuring a consistent primary key for the subsequent relational join operations.
 
 ### Left Join on: Estate name
+
 To integrate the resale transaction records with the "Town-Level Geospatial Reference" data, we established a common relational key using the 'town' variable. A preliminary schema inspection identified a formatting conflict as the reference dataset used uppercase syntax (e.g., "ANG MO KIO"), while the resale data utilized title case. To resolve this, we applied the str_to_upper() transformation to the resale dataset. This normalization harmonized the primary keys, enabling a successful left join that enriched all transaction records with the corresponding spatial attributes.
 
 ### Feature Aggregation

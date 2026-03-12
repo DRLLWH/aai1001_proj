@@ -1,7 +1,7 @@
 ---
-title: Week 03 -- `Tidyverse` Single-Table Queries 
+title: Group 15 -- HDB Resale Price Analysis
 subtitle: AAI1001 -- Data Engineering and Visualization 
-author: Guang Hua
+author: Group 15
 date: 2026-01-19
 date-format: "dddd MMM DD, YYYY"
 
@@ -38,43 +38,90 @@ library(gt)
 library(tidyverse)
 ```
 
-## Orignal Data Visualization
+## Why Study HDB Resale Prices? (Daryl)
+
+<hr>
+
+- HDB housing forms the primary housing market in Singapore  
+- Resale transactions reflect real market demand  
+- Price variation affects affordability and long-term financial planning  
+- However, most public discussions focus on headline prices
+
+## Limitations of Headline Price (Daryl)
+
+<hr>
+
+- Median prices do not capture full price variability  
+- Different flat types may exhibit different risk exposure  
+- Extreme transactions influence financial risk perception  
+- Distribution analysis provides deeper market insight
+
+## Orignal Data Visualisation: Density Heatmap of Resale Prices (Daryl)
+
+<hr>
+
+![](images/visualisation.jpg){width=1100}
+
+- Density heatmap visualising resale transactions across flat types  
+- Colour intensity represents transaction frequency  
+- Highlights clustering of prices within each housing category  
+- Provides an intuitive overview of market pricing patterns
+
+## Strengths of the Original Visulisation (Speaker 2)
 
 <hr>
 
 content
 
-## Critiques and Proposed Improvements
+## Limitations of the Original Visulisation (Speaker 2)
 
 <hr>
 
 content
 
-## Data Selection and Sources
+## Data Sources and Selection Rationale (Desmond)
 
 <hr>
 
 content
 
-## Data Engineering Workflow (from raw data to visualization-ready data)
+## Data Engineering Workflow (Desmond)
 
 <hr>
 
 content
 
-## Improved Visualization (corresponding to proposed improvements)
+## Feature Engineering and Aggregation (Desmond)
 
 <hr>
 
 content
 
-## Insights and Analysis
+## Proposed Visualisation Improvements (Speaker 4)
 
 <hr>
 
 content
 
-## Conclusion
+## Improved Visualisation: Split Violin with Boxplot Overlay (Speaker 4)
+
+<hr>
+
+content
+
+## Key Insights from the Improved Visualisation (Speaker 5)
+
+<hr>
+
+content
+
+## Interpretation of Pricing Patterns
+
+<hr>
+
+content
+
+## Conclusion and Implications
 
 <hr>
 
